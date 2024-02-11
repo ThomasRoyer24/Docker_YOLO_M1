@@ -11,14 +11,26 @@ cap = cv2.VideoCapture(0)
 while True:
     ret, frame = cap.read()
 
+    # Effectuer l'inférence avec YOLOv5
     results = model(frame)
 
     # Récupérer les prédictions
     predictions = results.xyxy[0].numpy()
 
-    # Dessiner les bounding boxes sur l'image
+    # Modifier la couleur en fonction de la position de la bounding box
     for box in predictions:
-        cv2.rectangle(frame, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0), 2)
+        x, y, w, h = int(box[0]), int(box[1]), int(box[2] - box[0]), int(box[3] - box[1])
+
+        # Calculer la composante bleue en fonction de la position x
+        blue_component = int(255 * (x / frame.shape[1]))
+
+        # Calculer la composante rouge en fonction de la position y
+        red_component = int(255 * (y / frame.shape[0]))
+
+        # Utiliser les composantes pour définir la couleur
+        color = (blue_component, 0, red_component)
+
+        cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
 
     cv2.imshow('Camera', frame)
 
